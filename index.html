@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏆 Bolão Copa do Mundo 2026</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green-dark:#004d1a; --green:#006622; --green-mid:#008c2e; --green-light:#00b33c;
+      --gold:#FFD700; --gold-dark:#c8a800; --white:#ffffff; --off-white:#f4f9f5;
+      --gray-light:#e8f0ea; --gray:#9aafa0; --gray-dark:#4a5f50; --text:#1a2e1f;
+      --red:#c0392b; --blue:#1a6aad; --shadow:0 2px 12px rgba(0,80,20,.15); --radius:10px;
+    }
+    body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; background:var(--off-white); color:var(--text); min-height:100vh; }
+
+    header {
+      background-image:
+        repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0px,rgba(255,255,255,.04) 40px,transparent 40px,transparent 80px),
+        linear-gradient(135deg,var(--green-dark) 0%,var(--green) 50%,var(--green-mid) 100%);
+      padding:24px 20px 20px; text-align:center; color:var(--white); position:relative; overflow:hidden;
+    }
+    header::after { content:''; position:absolute; bottom:0; left:0; right:0; height:4px; background:linear-gradient(90deg,var(--gold),var(--gold-dark),var(--gold)); }
+    .header-trophy { font-size:2.8rem; display:block; line-height:1; }
+    .header-title  { font-size:1.8rem; font-weight:800; letter-spacing:.5px; margin:6px 0 2px; }
+    .header-sub    { font-size:.85rem; color:rgba(255,255,255,.75); letter-spacing:1px; text-transform:uppercase; }
+
+    .toolbar { background:var(--white); border-bottom:1px solid var(--gray-light); padding:10px 16px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; }
+    .toolbar-actions { display:flex; gap:6px; flex-wrap:wrap; }
+    .btn { display:inline-flex; align-items:center; gap:5px; border:none; border-radius:6px; cursor:pointer; font-size:.8rem; font-weight:600; padding:7px 13px; transition:opacity .15s,transform .1s; }
+    .btn:hover  { opacity:.88; }
+    .btn:active { transform:scale(.97); }
+    .btn-green  { background:var(--green); color:var(--white); }
+    .btn-gold   { background:var(--gold); color:var(--green-dark); }
+    .btn-danger { background:var(--red); color:var(--white); }
+    .btn-gray   { background:var(--gray-light); color:var(--gray-dark); }
+    .btn-amber  { background:#f59e0b; color:#1a1a1a; }
+
+    .search-box { display:flex; align-items:center; gap:6px; background:var(--gray-light); border-radius:6px; padding:6px 10px; flex:1; min-width:180px; max-width:280px; }
+    .search-box input { border:none; background:transparent; outline:none; font-size:.85rem; color:var(--text); width:100%; }
+
+    .tabs { background:var(--white); border-bottom:2px solid var(--gray-light); display:flex; overflow-x:auto; scrollbar-width:none; }
+    .tabs::-webkit-scrollbar { display:none; }
+    .tab { flex-shrink:0; padding:13px 20px; font-size:.88rem; font-weight:600; color:var(--gray-dark); cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; transition:color .15s,border-color .15s; white-space:nowrap; }
+    .tab:hover  { color:var(--green); }
+    .tab.active { color:var(--green); border-color:var(--gold); }
+
+    main { padding:20px 16px; max-width:1100px; margin:0 auto; }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
+
+    .round-header { display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+    .round-badge { background:var(--green); color:var(--white); font-size:.75rem; font-weight:700; padding:4px 10px; border-radius:20px; letter-spacing:.5px; text-transform:uppercase; }
+    .round-title { font-size:1.2rem; font-weight:700; color:var(--green-dark); }
+
+    .group-section { margin-bottom:32px; }
+    .group-label { font-size:.78rem; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; background:var(--green-dark); display:inline-block; padding:3px 12px; border-radius:4px; color:var(--gold); margin-bottom:10px; }
+
+    .game-card { background:var(--white); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:16px; overflow:hidden; border:1px solid var(--gray-light); transition:box-shadow .2s; }
+    .game-card:hover { box-shadow:0 4px 20px rgba(0,80,20,.2); }
+    .game-card.finished { border-left:4px solid var(--green-light); }
+
+    .game-header { background:linear-gradient(90deg,var(--green-dark),var(--green)); color:var(--white); padding:10px 16px; display:flex; align-items:center; justify-content:space-between; }
+    .game-id { font-size:.72rem; opacity:.7; min-width:60px; }
+    .game-matchup { font-weight:700; font-size:.95rem; text-align:center; flex:1; display:flex; align-items:center; justify-content:center; gap:8px; }
+    .game-vs { font-size:.7rem; opacity:.6; }
+    .game-status { font-size:.7rem; padding:2px 8px; border-radius:10px; min-width:80px; text-align:right; }
+    .game-status.open     { color:var(--gold); }
+    .game-status.finished { color:#7aff7a; }
+
+    .official-result-bar { display:flex; align-items:center; justify-content:center; gap:8px; padding:6px 16px; background:var(--gray-light); font-size:.8rem; font-weight:600; color:var(--gray-dark); border-bottom:1px solid #dde8df; }
+    .official-result-bar.has-result { background:#d4f0dc; color:var(--green-dark); }
+
+    .participants-table { width:100%; border-collapse:collapse; }
+    .participants-table th { background:var(--off-white); font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--gray-dark); padding:8px 12px; border-bottom:1px solid var(--gray-light); text-align:center; }
+    .participants-table th.name-col { text-align:left; }
+    .participants-table td { padding:9px 12px; border-bottom:1px solid var(--gray-light); text-align:center; font-size:.88rem; }
+    .participants-table tr:last-child td { border-bottom:none; }
+    .participants-table tr:hover td { background:var(--off-white); }
+    .participant-name { font-weight:700; color:var(--green-dark); text-align:left; }
+    .participant-points-cell { font-weight:700; font-size:.95rem; font-variant-numeric:tabular-nums; }
+    .pts-5 { color:var(--green); }
+    .pts-2 { color:var(--blue); }
+    .pts-0 { color:var(--gray); }
+
+
+    .score-group { display:inline-flex; align-items:center; gap:4px; background:var(--gray-light); border-radius:6px; padding:2px 6px; }
+    .score-input { width:38px; padding:5px 4px; border:1px solid transparent; border-radius:4px; font-size:.9rem; font-weight:700; text-align:center; background:var(--white); color:var(--text); font-variant-numeric:tabular-nums; transition:border-color .15s; -moz-appearance:textfield; }
+    .score-input::-webkit-outer-spin-button, .score-input::-webkit-inner-spin-button { -webkit-appearance:none; }
+    .score-input:focus { outline:none; border-color:var(--green-light); box-shadow:0 0 0 2px rgba(0,180,60,.15); }
+    .score-input:disabled { background:var(--gray-light); color:var(--gray); }
+    .score-x { font-weight:700; color:var(--gray); font-size:.8rem; }
+    .exact-score .score-input { background:#fff3b0; border-color:var(--gold-dark); }
+
+    .filter-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; align-items:center; }
+    .filter-btn { padding:5px 12px; border-radius:20px; border:2px solid var(--gray-light); font-size:.78rem; font-weight:700; cursor:pointer; background:var(--white); color:var(--gray-dark); transition:all .15s; }
+    .filter-btn:hover  { border-color:var(--green); color:var(--green); }
+    .filter-btn.active { background:var(--green); color:var(--white); border-color:var(--green); }
+
+    .results-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
+    .result-card { background:var(--white); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; border:1px solid var(--gray-light); }
+    .result-card.done { border-left:4px solid var(--green-light); }
+    .result-card-title { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--gray-dark); margin-bottom:10px; }
+    .result-matchup { display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:12px; }
+    .team-name { font-weight:700; font-size:.9rem; flex:1; }
+    .team-name.home { text-align:right; }
+    .team-name.away { text-align:left; }
+    .result-inputs { display:flex; align-items:center; gap:6px; }
+    .result-input { width:50px; padding:8px 4px; border:2px solid var(--gray-light); border-radius:6px; font-size:1.1rem; font-weight:800; text-align:center; font-variant-numeric:tabular-nums; -moz-appearance:textfield; }
+    .result-input::-webkit-outer-spin-button, .result-input::-webkit-inner-spin-button { -webkit-appearance:none; }
+    .result-input:focus { outline:none; border-color:var(--green); }
+    .result-x { font-weight:700; color:var(--gray); }
+    .btn-confirm { width:100%; margin-top:12px; padding:9px; border:none; border-radius:6px; background:var(--green); color:var(--white); font-weight:700; font-size:.88rem; cursor:pointer; transition:background .15s; }
+    .btn-confirm:hover { background:var(--green-dark); }
+    .btn-confirm:disabled { background:var(--gray); cursor:not-allowed; }
+    .btn-edit-result { width:100%; margin-top:6px; padding:8px; border:none; border-radius:6px; background:#f59e0b; color:#1a1a1a; font-weight:700; font-size:.82rem; cursor:pointer; transition:background .15s; display:flex; align-items:center; justify-content:center; gap:5px; }
+    .btn-edit-result:hover { background:#d97706; color:var(--white); }
+    .confirmed-badge { text-align:center; margin-top:10px; font-size:.8rem; font-weight:700; color:var(--green); display:none; }
+    .result-card.done .confirmed-badge { display:block; }
+    .result-card.done .btn-confirm { background:var(--gray); }
+
+    .ranking-table { width:100%; border-collapse:collapse; background:var(--white); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); }
+    .ranking-table th { background:var(--green-dark); color:var(--white); padding:12px 16px; font-size:.82rem; text-transform:uppercase; letter-spacing:.5px; }
+    .ranking-table td { padding:13px 16px; border-bottom:1px solid var(--gray-light); }
+    .ranking-table tr:last-child td { border-bottom:none; }
+    .rank-pos  { font-weight:800; font-size:1.1rem; text-align:center; }
+    .rank-name { font-weight:700; font-size:1rem; }
+    .rank-pts  { font-weight:800; font-size:1.1rem; text-align:center; font-variant-numeric:tabular-nums; color:var(--green); }
+    .rank-detail { font-size:.78rem; color:var(--gray); text-align:center; }
+    .rank-1 td { background:linear-gradient(90deg,#fff9d0,#fffef5); }
+    .rank-2 td { background:linear-gradient(90deg,#f0f0f0,#fafafa); }
+    .rank-3 td { background:linear-gradient(90deg,#fff2e8,#fffdf9); }
+    .rank-breakdown { display:flex; gap:10px; margin-top:4px; }
+    .rank-breakdown span { font-size:.75rem; font-weight:600; padding:1px 7px; border-radius:10px; }
+    .bd-5 { background:#d4f7dc; color:var(--green-dark); }
+    .bd-2 { background:#dde9ff; color:var(--blue); }
+
+    #toast { position:fixed; bottom:24px; right:24px; background:var(--green-dark); color:var(--white); padding:12px 20px; border-radius:8px; font-size:.88rem; font-weight:600; box-shadow:0 4px 20px rgba(0,0,0,.3); transform:translateY(60px); opacity:0; transition:all .3s; z-index:999; border-left:4px solid var(--gold); }
+    #toast.show { transform:translateY(0); opacity:1; }
+
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; z-index:900; opacity:0; pointer-events:none; transition:opacity .2s; }
+    .modal-overlay.open { opacity:1; pointer-events:all; }
+    .modal-box { background:var(--white); border-radius:var(--radius); padding:28px; max-width:380px; width:90%; box-shadow:0 8px 40px rgba(0,0,0,.3); }
+    .modal-title { font-weight:700; font-size:1.1rem; margin-bottom:10px; }
+    .modal-msg   { font-size:.88rem; color:var(--gray-dark); margin-bottom:20px; }
+    .modal-btns  { display:flex; gap:10px; justify-content:flex-end; }
+
+    @media (max-width:600px) {
+      .participants-table th, .participants-table td { padding:7px 6px; font-size:.78rem; }
+      .tab { padding:11px 14px; font-size:.8rem; }
+      main { padding:14px 10px; }
+      .header-title { font-size:1.4rem; }
+      .results-grid { grid-template-columns:1fr; }
+    }
+    .no-results-msg { text-align:center; color:var(--gray); padding:40px; font-size:.95rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="header-trophy">🏆</span>
+  <div class="header-title">Bolão Copa do Mundo 2026</div>
+  <div class="header-sub">EUA · Canadá · México &nbsp;|&nbsp; 11 Jun – 19 Jul 2026</div>
+</header>
+
+<div class="toolbar">
+  <div class="search-box">🔍 <input type="text" id="searchInput" placeholder="Buscar seleção ou grupo…" /></div>
+  <div class="toolbar-actions">
+    <button class="btn btn-green"  onclick="exportData()">⬇ Exportar</button>
+    <label  class="btn btn-gold">⬆ Importar<input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)"/></label>
+    <button class="btn btn-danger" onclick="confirmClear()">🗑 Limpar Tudo</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="round1">⚽ Rodada 1</div>
+  <div class="tab"        data-tab="round2">⚽ Rodada 2</div>
+  <div class="tab"        data-tab="round3">⚽ Rodada 3</div>
+  <div class="tab"        data-tab="results">📋 Resultados</div>
+  <div class="tab"        data-tab="ranking">🏅 Classificação</div>
+</div>
+
+<main>
+  <div class="tab-panel active" id="panel-round1"></div>
+  <div class="tab-panel"        id="panel-round2"></div>
+  <div class="tab-panel"        id="panel-round3"></div>
+
+  <div class="tab-panel" id="panel-results">
+    <div class="round-header">
+      <span class="round-badge">Admin</span>
+      <span class="round-title">Resultados Oficiais</span>
+    </div>
+    <div class="filter-bar">
+      <span style="font-size:.8rem;font-weight:600;color:var(--gray-dark)">Filtrar:</span>
+      <button class="filter-btn active" onclick="setFilter('all',this)">Todos</button>
+      <button class="filter-btn"        onclick="setFilter('1',this)">Rodada 1</button>
+      <button class="filter-btn"        onclick="setFilter('2',this)">Rodada 2</button>
+      <button class="filter-btn"        onclick="setFilter('3',this)">Rodada 3</button>
+      <button class="filter-btn"        onclick="setFilter('open',this)">Abertos</button>
+      <button class="filter-btn"        onclick="setFilter('done',this)">Confirmados</button>
+    </div>
+    <div class="results-grid" id="resultsGrid"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-ranking">
+    <div class="round-header">
+      <span class="round-badge">Classificação</span>
+      <span class="round-title">Bolão do Grupo</span>
+    </div>
+    <table class="ranking-table">
+      <thead><tr>
+        <th style="width:60px">Pos.</th>
+        <th>Participante</th>
+        <th style="width:100px">Pontos</th>
+        <th>Acertos</th>
+      </tr></thead>
+      <tbody id="rankingBody"></tbody>
+    </table>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-msg"   id="modalMsg"></div>
+    <div class="modal-btns">
+      <button class="btn btn-gray"   onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger" id="modalOk">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   JOGOS OFICIAIS — Copa do Mundo 2026
+   Grupos: A-L (48 seleções, 12 grupos, 72 jogos)
+   ========================================================= */
+const JOGOS = [
+  // ── RODADA 1 ──
+  {id: 1,rodada:1,grupo:"A",mandante:"México",             visitante:"África do Sul",        data:"11/06"},
+  {id: 2,rodada:1,grupo:"A",mandante:"Coreia do Sul",      visitante:"República Tcheca",     data:"11/06"},
+  {id: 3,rodada:1,grupo:"B",mandante:"Canadá",             visitante:"Bósnia e Herzegovina", data:"12/06"},
+  {id: 4,rodada:1,grupo:"B",mandante:"Catar",              visitante:"Suíça",                data:"13/06"},
+  {id: 5,rodada:1,grupo:"C",mandante:"Brasil",             visitante:"Marrocos",             data:"13/06"},
+  {id: 6,rodada:1,grupo:"C",mandante:"Haiti",              visitante:"Escócia",              data:"13/06"},
+  {id: 7,rodada:1,grupo:"D",mandante:"Estados Unidos",     visitante:"Paraguai",             data:"12/06"},
+  {id: 8,rodada:1,grupo:"D",mandante:"Austrália",          visitante:"Turquia",              data:"13/06"},
+  {id: 9,rodada:1,grupo:"E",mandante:"Alemanha",           visitante:"Curaçao",              data:"14/06"},
+  {id:10,rodada:1,grupo:"E",mandante:"Costa do Marfim",    visitante:"Equador",              data:"14/06"},
+  {id:11,rodada:1,grupo:"F",mandante:"Holanda",            visitante:"Japão",                data:"14/06"},
+  {id:12,rodada:1,grupo:"F",mandante:"Tunísia",            visitante:"Suécia",               data:"14/06"},
+  {id:13,rodada:1,grupo:"G",mandante:"Bélgica",            visitante:"Egito",                data:"15/06"},
+  {id:14,rodada:1,grupo:"G",mandante:"Irã",                visitante:"Nova Zelândia",        data:"15/06"},
+  {id:15,rodada:1,grupo:"H",mandante:"Espanha",            visitante:"Cabo Verde",           data:"15/06"},
+  {id:16,rodada:1,grupo:"H",mandante:"Arábia Saudita",     visitante:"Uruguai",              data:"15/06"},
+  {id:17,rodada:1,grupo:"I",mandante:"França",             visitante:"Senegal",              data:"16/06"},
+  {id:18,rodada:1,grupo:"I",mandante:"Iraque",             visitante:"Noruega",              data:"16/06"},
+  {id:19,rodada:1,grupo:"J",mandante:"Argentina",          visitante:"Argélia",              data:"16/06"},
+  {id:20,rodada:1,grupo:"J",mandante:"Jordânia",           visitante:"Áustria",              data:"17/06"},
+  {id:21,rodada:1,grupo:"K",mandante:"Portugal",           visitante:"RD Congo",             data:"17/06"},
+  {id:22,rodada:1,grupo:"K",mandante:"Uzbequistão",        visitante:"Colômbia",             data:"17/06"},
+  {id:23,rodada:1,grupo:"L",mandante:"Inglaterra",         visitante:"Croácia",              data:"17/06"},
+  {id:24,rodada:1,grupo:"L",mandante:"Gana",               visitante:"Panamá",               data:"17/06"},
+  // ── RODADA 2 ──
+  {id:25,rodada:2,grupo:"A",mandante:"República Tcheca",   visitante:"África do Sul",        data:"18/06"},
+  {id:26,rodada:2,grupo:"A",mandante:"México",             visitante:"Coreia do Sul",        data:"18/06"},
+  {id:27,rodada:2,grupo:"B",mandante:"Suíça",              visitante:"Bósnia e Herzegovina", data:"18/06"},
+  {id:28,rodada:2,grupo:"B",mandante:"Canadá",             visitante:"Catar",                data:"18/06"},
+  {id:29,rodada:2,grupo:"C",mandante:"Escócia",            visitante:"Marrocos",             data:"19/06"},
+  {id:30,rodada:2,grupo:"C",mandante:"Brasil",             visitante:"Haiti",                data:"19/06"},
+  {id:31,rodada:2,grupo:"D",mandante:"Turquia",            visitante:"Paraguai",             data:"19/06"},
+  {id:32,rodada:2,grupo:"D",mandante:"Estados Unidos",     visitante:"Austrália",            data:"19/06"},
+  {id:33,rodada:2,grupo:"E",mandante:"Alemanha",           visitante:"Costa do Marfim",      data:"20/06"},
+  {id:34,rodada:2,grupo:"E",mandante:"Equador",            visitante:"Curaçao",              data:"20/06"},
+  {id:35,rodada:2,grupo:"F",mandante:"Holanda",            visitante:"Suécia",               data:"20/06"},
+  {id:36,rodada:2,grupo:"F",mandante:"Tunísia",            visitante:"Japão",                data:"21/06"},
+  {id:37,rodada:2,grupo:"G",mandante:"Bélgica",            visitante:"Irã",                  data:"21/06"},
+  {id:38,rodada:2,grupo:"G",mandante:"Nova Zelândia",      visitante:"Egito",                data:"21/06"},
+  {id:39,rodada:2,grupo:"H",mandante:"Espanha",            visitante:"Arábia Saudita",       data:"21/06"},
+  {id:40,rodada:2,grupo:"H",mandante:"Uruguai",            visitante:"Cabo Verde",           data:"21/06"},
+  {id:41,rodada:2,grupo:"I",mandante:"França",             visitante:"Iraque",               data:"22/06"},
+  {id:42,rodada:2,grupo:"I",mandante:"Noruega",            visitante:"Senegal",              data:"22/06"},
+  {id:43,rodada:2,grupo:"J",mandante:"Argentina",          visitante:"Áustria",              data:"22/06"},
+  {id:44,rodada:2,grupo:"J",mandante:"Jordânia",           visitante:"Argélia",              data:"23/06"},
+  {id:45,rodada:2,grupo:"K",mandante:"Portugal",           visitante:"Uzbequistão",          data:"23/06"},
+  {id:46,rodada:2,grupo:"K",mandante:"Colômbia",           visitante:"RD Congo",             data:"23/06"},
+  {id:47,rodada:2,grupo:"L",mandante:"Inglaterra",         visitante:"Gana",                 data:"23/06"},
+  {id:48,rodada:2,grupo:"L",mandante:"Panamá",             visitante:"Croácia",              data:"23/06"},
+  // ── RODADA 3 ──
+  {id:49,rodada:3,grupo:"A",mandante:"República Tcheca",   visitante:"México",               data:"24/06"},
+  {id:50,rodada:3,grupo:"A",mandante:"África do Sul",      visitante:"Coreia do Sul",        data:"24/06"},
+  {id:51,rodada:3,grupo:"B",mandante:"Suíça",              visitante:"Canadá",               data:"24/06"},
+  {id:52,rodada:3,grupo:"B",mandante:"Bósnia e Herzegovina",visitante:"Catar",               data:"24/06"},
+  {id:53,rodada:3,grupo:"C",mandante:"Escócia",            visitante:"Brasil",               data:"24/06"},
+  {id:54,rodada:3,grupo:"C",mandante:"Marrocos",           visitante:"Haiti",                data:"24/06"},
+  {id:55,rodada:3,grupo:"D",mandante:"Turquia",            visitante:"Estados Unidos",       data:"25/06"},
+  {id:56,rodada:3,grupo:"D",mandante:"Paraguai",           visitante:"Austrália",            data:"25/06"},
+  {id:57,rodada:3,grupo:"E",mandante:"Equador",            visitante:"Alemanha",             data:"25/06"},
+  {id:58,rodada:3,grupo:"E",mandante:"Curaçao",            visitante:"Costa do Marfim",      data:"25/06"},
+  {id:59,rodada:3,grupo:"F",mandante:"Japão",              visitante:"Suécia",               data:"25/06"},
+  {id:60,rodada:3,grupo:"F",mandante:"Tunísia",            visitante:"Holanda",              data:"25/06"},
+  {id:61,rodada:3,grupo:"G",mandante:"Egito",              visitante:"Irã",                  data:"27/06"},
+  {id:62,rodada:3,grupo:"G",mandante:"Nova Zelândia",      visitante:"Bélgica",              data:"27/06"},
+  {id:63,rodada:3,grupo:"H",mandante:"Cabo Verde",         visitante:"Arábia Saudita",       data:"26/06"},
+  {id:64,rodada:3,grupo:"H",mandante:"Uruguai",            visitante:"Espanha",              data:"26/06"},
+  {id:65,rodada:3,grupo:"I",mandante:"Noruega",            visitante:"França",               data:"26/06"},
+  {id:66,rodada:3,grupo:"I",mandante:"Senegal",            visitante:"Iraque",               data:"26/06"},
+  {id:67,rodada:3,grupo:"J",mandante:"Argélia",            visitante:"Áustria",              data:"27/06"},
+  {id:68,rodada:3,grupo:"J",mandante:"Jordânia",           visitante:"Argentina",            data:"27/06"},
+  {id:69,rodada:3,grupo:"K",mandante:"Colômbia",           visitante:"Portugal",             data:"27/06"},
+  {id:70,rodada:3,grupo:"K",mandante:"RD Congo",           visitante:"Uzbequistão",          data:"27/06"},
+  {id:71,rodada:3,grupo:"L",mandante:"Panamá",             visitante:"Inglaterra",           data:"27/06"},
+  {id:72,rodada:3,grupo:"L",mandante:"Croácia",            visitante:"Gana",                 data:"27/06"},
+];
+
+const PARTICIPANTES = ["Thiago","Milena","Riquelme","João","Victor"];
+
+let state = { palpites:{}, resultados:{} };
+let resultFilter = 'all';
+
+/* ── STATE ── */
+function loadState() {
+  try {
+    const r = localStorage.getItem("bolao_copa_2026");
+    if (r) { state = JSON.parse(r); }
+  } catch(e) {}
+}
+function saveState() { localStorage.setItem("bolao_copa_2026", JSON.stringify(state)); }
+
+/* ── PONTUAÇÃO ── */
+function getWinner(h,a) { return h>a?'home':a>h?'away':'draw'; }
+function calcPontos(pal,res) {
+  if (!res||!res.confirmed) return null;
+  const ph=Number(pal.home),pa=Number(pal.away),rh=Number(res.home),ra=Number(res.away);
+  if (isNaN(ph)||isNaN(pa)||pal.home===''||pal.away==='') return 0;
+  if (ph===rh&&pa===ra) return 5;
+  if (getWinner(ph,pa)===getWinner(rh,ra)) return 2;
+  return 0;
+}
+function getClassificacao() {
+  return PARTICIPANTES.map(p => {
+    let total=0,exact=0,winner=0;
+    JOGOS.forEach(j => {
+      const res=state.resultados[j.id], pal=(state.palpites[j.id]||{})[p];
+      if (!pal) return;
+      const pts=calcPontos(pal,res);
+      if (pts===5){total+=5;exact++;} else if (pts===2){total+=2;winner++;}
+    });
+    return {nome:p,total,exact,winner};
+  }).sort((a,b)=>b.total-a.total||b.exact-a.exact);
+}
+
+/* ── FLAGS ── */
+function flag(c) {
+  const F = {
+    "México":"🇲🇽","África do Sul":"🇿🇦","Coreia do Sul":"🇰🇷","República Tcheca":"🇨🇿",
+    "Canadá":"🇨🇦","Catar":"🇶🇦","Suíça":"🇨🇭","Bósnia e Herzegovina":"🇧🇦",
+    "Brasil":"🇧🇷","Marrocos":"🇲🇦","Haiti":"🇭🇹","Escócia":"🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+    "Estados Unidos":"🇺🇸","Paraguai":"🇵🇾","Austrália":"🇦🇺","Turquia":"🇹🇷",
+    "Alemanha":"🇩🇪","Curaçao":"🇨🇼","Costa do Marfim":"🇨🇮","Equador":"🇪🇨",
+    "Holanda":"🇳🇱","Japão":"🇯🇵","Tunísia":"🇹🇳","Suécia":"🇸🇪",
+    "Bélgica":"🇧🇪","Egito":"🇪🇬","Irã":"🇮🇷","Nova Zelândia":"🇳🇿",
+    "Espanha":"🇪🇸","Cabo Verde":"🇨🇻","Arábia Saudita":"🇸🇦","Uruguai":"🇺🇾",
+    "França":"🇫🇷","Senegal":"🇸🇳","Noruega":"🇳🇴","Iraque":"🇮🇶",
+    "Argentina":"🇦🇷","Argélia":"🇩🇿","Áustria":"🇦🇹","Jordânia":"🇯🇴",
+    "Portugal":"🇵🇹","Uzbequistão":"🇺🇿","Colômbia":"🇨🇴","RD Congo":"🇨🇩",
+    "Inglaterra":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","Croácia":"🇭🇷","Gana":"🇬🇭","Panamá":"🇵🇦",
+  };
+  return F[c]||"🏳";
+}
+
+/* ── RENDER RODADA ── */
+function renderRound(rodada) {
+  const panel  = document.getElementById(`panel-round${rodada}`);
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const grupos = {};
+  JOGOS.filter(j=>j.rodada===rodada).forEach(j=>{ if(!grupos[j.grupo]) grupos[j.grupo]=[]; grupos[j.grupo].push(j); });
+
+  let html = `<div class="round-header"><span class="round-badge">48 Seleções · 12 Grupos</span><span class="round-title">Rodada ${rodada}</span></div>`;
+  let totalFound = 0;
+
+  Object.keys(grupos).sort().forEach(g => {
+    let secHtml='', secFound=0;
+    grupos[g].forEach(jogo => {
+      if (search && !jogo.mandante.toLowerCase().includes(search) && !jogo.visitante.toLowerCase().includes(search) && !('grupo '+jogo.grupo.toLowerCase()).includes(search)) return;
+      secFound++; totalFound++;
+
+      const res=state.resultados[jogo.id]||{}, finished=!!res.confirmed;
+      const palps=state.palpites[jogo.id]||{};
+      const mF=flag(jogo.mandante), vF=flag(jogo.visitante);
+      const resultBar = finished
+        ? `<div class="official-result-bar has-result">✅ Resultado: ${mF} <strong>${res.home} × ${res.away}</strong> ${vF}</div>`
+        : `<div class="official-result-bar">⏳ Aguardando resultado — ${jogo.data}</div>`;
+
+      let rows='';
+      PARTICIPANTES.forEach(p => {
+        const pal=palps[p]||{home:'',away:''};
+        const pts=calcPontos(pal,res);
+        const dis=finished?'disabled':'';
+        let badge='';
+        if (finished&&pal.home!==''&&pal.away!=='') {
+          if (pts===5)      badge=`<span class="participant-points-cell pts-5">+5 🎯</span>`;
+          else if (pts===2) badge=`<span class="participant-points-cell pts-2">+2 ✓</span>`;
+          else              badge=`<span class="participant-points-cell pts-0">0</span>`;
+        }
+        rows+=`<tr class="${pts===5?'exact-score':''}">
+          <td class="participant-name">${p}</td>
+          <td><div class="score-group">
+            <input type="number" min="0" max="99" class="score-input" value="${pal.home}" ${dis}
+              onchange="savePalpite(${jogo.id},'${p}','home',this.value)" placeholder="–"/>
+            <span class="score-x">×</span>
+            <input type="number" min="0" max="99" class="score-input" value="${pal.away}" ${dis}
+              onchange="savePalpite(${jogo.id},'${p}','away',this.value)" placeholder="–"/>
+          </div></td>
+          <td>${badge}</td>
+        </tr>`;
+      });
+
+      secHtml+=`<div class="game-card ${finished?'finished':''}" data-id="${jogo.id}">
+        <div class="game-header">
+          <span class="game-id">#${jogo.id} · ${jogo.data}</span>
+          <div class="game-matchup">${mF} ${jogo.mandante} <span class="game-vs">×</span> ${jogo.visitante} ${vF}</div>
+          <span class="game-status ${finished?'finished':'open'}">${finished?'✅ Final':'🟡 Aberto'}</span>
+        </div>
+        ${resultBar}
+        <table class="participants-table">
+          <thead><tr><th class="name-col">Participante</th><th>Palpite</th><th style="width:80px">Pts</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+    });
+    if (secFound>0) html+=`<div class="group-section"><div class="group-label">Grupo ${g}</div>${secHtml}</div>`;
+  });
+
+  if (totalFound===0) html+=`<div class="no-results-msg">🔍 Nenhum jogo encontrado para "<strong>${search}</strong>"</div>`;
+  panel.innerHTML = html;
+}
+
+/* ── RENDER RESULTADOS ── */
+function renderResults() {
+  const grid=document.getElementById('resultsGrid');
+  const search=document.getElementById('searchInput').value.toLowerCase();
+  let html='', found=0;
+
+  JOGOS.forEach(jogo => {
+    const res=state.resultados[jogo.id]||{}, done=!!res.confirmed;
+    if (resultFilter==='1'&&jogo.rodada!==1) return;
+    if (resultFilter==='2'&&jogo.rodada!==2) return;
+    if (resultFilter==='3'&&jogo.rodada!==3) return;
+    if (resultFilter==='open'&&done) return;
+    if (resultFilter==='done'&&!done) return;
+    if (search&&!jogo.mandante.toLowerCase().includes(search)&&!jogo.visitante.toLowerCase().includes(search)) return;
+    found++;
+
+    const mF=flag(jogo.mandante), vF=flag(jogo.visitante);
+    html+=`<div class="result-card ${done?'done':''}" id="rcard-${jogo.id}">
+      <div class="result-card-title">Jogo #${jogo.id} · Grupo ${jogo.grupo} · Rodada ${jogo.rodada} · ${jogo.data}</div>
+      <div class="result-matchup">
+        <div class="team-name home">${mF} ${jogo.mandante}</div>
+        <div class="result-inputs">
+          <input type="number" min="0" max="99" class="result-input" id="rh-${jogo.id}" value="${res.home!==undefined?res.home:''}" placeholder="0" ${done?'disabled':''}/>
+          <span class="result-x">×</span>
+          <input type="number" min="0" max="99" class="result-input" id="ra-${jogo.id}" value="${res.away!==undefined?res.away:''}" placeholder="0" ${done?'disabled':''}/>
+        </div>
+        <div class="team-name away">${jogo.visitante} ${vF}</div>
+      </div>
+      <button class="btn-confirm" onclick="confirmResult(${jogo.id})" ${done?'disabled':''}>
+        ${done?'✅ Confirmado':'✔ Confirmar Resultado'}
+      </button>
+      ${done?`<button class="btn-edit-result" onclick="editarResultado(${jogo.id})">✏️ Corrigir Resultado</button>`:''}
+      <div class="confirmed-badge">✅ Resultado registrado!</div>
+    </div>`;
+  });
+
+  if (found===0) html=`<div class="no-results-msg">Nenhum jogo encontrado.</div>`;
+  grid.innerHTML = html;
+}
+
+function setFilter(f, btn) {
+  resultFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderResults();
+}
+
+/* ── RENDER RANKING ── */
+function renderRanking() {
+  const medals=['🥇','🥈','🥉'];
+  document.getElementById('rankingBody').innerHTML = getClassificacao().map((item,idx) => {
+    const pos=idx+1, medal=medals[idx]||pos;
+    return `<tr class="${pos<=3?'rank-'+pos:''}">
+      <td class="rank-pos">${medal}</td>
+      <td>
+        <div class="rank-name">${item.nome}</div>
+        <div class="rank-breakdown">
+          <span class="bd-5">🎯 ${item.exact} exato${item.exact!==1?'s':''}</span>
+          <span class="bd-2">✓ ${item.winner} vencedor${item.winner!==1?'es':''}</span>
+        </div>
+      </td>
+      <td class="rank-pts">${item.total} pts</td>
+      <td class="rank-detail">${item.exact+item.winner} acerto${item.exact+item.winner!==1?'s':''}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── AÇÕES ── */
+function savePalpite(jogoId,p,campo,valor) {
+  if (!state.palpites[jogoId]) state.palpites[jogoId]={};
+  if (!state.palpites[jogoId][p]) state.palpites[jogoId][p]={home:'',away:''};
+  state.palpites[jogoId][p][campo]=valor===''?'':Number(valor);
+  saveState();
+}
+
+function confirmResult(jogoId) {
+  const h=document.getElementById(`rh-${jogoId}`).value;
+  const a=document.getElementById(`ra-${jogoId}`).value;
+  if (h===''||a==='') { showToast('⚠️ Preencha ambos os campos!'); return; }
+  state.resultados[jogoId]={home:Number(h),away:Number(a),confirmed:true};
+  saveState(); renderAll();
+  showToast('✅ Resultado confirmado e pontuação atualizada!');
+}
+
+function editarResultado(jogoId) {
+  const jogo=JOGOS.find(j=>j.id===jogoId);
+  openModal(
+    'Corrigir resultado?',
+    `${jogo.mandante} × ${jogo.visitante} — o jogo será reaberto para edição.`,
+    () => {
+      state.resultados[jogoId].confirmed=false;
+      saveState(); renderAll(); closeModal();
+      showToast('✏️ Resultado reaberto. Corrija e confirme novamente.');
+    }
+  );
+}
+
+
+
+
+
+/* ── EXPORTAR / IMPORTAR / LIMPAR ── */
+function exportData() {
+  const url=URL.createObjectURL(new Blob([JSON.stringify({state,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'}));
+  const a=document.createElement('a'); a.href=url; a.download=`bolao-copa-2026-${Date.now()}.json`; a.click();
+  URL.revokeObjectURL(url); showToast('📁 Dados exportados!');
+}
+function importData(e) {
+  const f=e.target.files[0]; if (!f) return;
+  const r=new FileReader();
+  r.onload=ev => {
+    try {
+      const d=JSON.parse(ev.target.result);
+      if (d.state) { state=d.state; saveState(); renderAll(); showToast('📂 Dados importados!'); }
+      else showToast('❌ Arquivo inválido!');
+    } catch { showToast('❌ Erro ao importar!'); }
+  };
+  r.readAsText(f); e.target.value='';
+}
+function confirmClear() {
+  openModal('Limpar todos os dados?','Isso apagará todos os palpites e resultados permanentemente.',() => {
+    state={palpites:{},resultados:{}}; saveState(); renderAll(); closeModal();
+    showToast('🗑️ Dados apagados.');
+  });
+}
+
+/* ── MODAL ── */
+function openModal(title,msg,onOk) {
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalMsg').textContent=msg;
+  document.getElementById('modalOk').onclick=onOk;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+/* ── TOAST ── */
+let _tt;
+function showToast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(_tt); _tt=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+/* ── TABS ── */
+function initTabs() {
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click',()=>{
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
+    });
+  });
+}
+
+/* ── BUSCA ── */
+function initSearch() { document.getElementById('searchInput').addEventListener('input',renderAll); }
+
+/* ── RENDER ALL ── */
+function renderAll() { renderRound(1); renderRound(2); renderRound(3); renderResults(); renderRanking(); }
+
+/* ── INIT ── */
+loadState(); initTabs(); initSearch();
+// Estado pré-carregado: Rodadas 1, 2 e 3
+(function(){
+  try {
+    var preloaded = {"palpites": {"3": {"Victor": {"home": 2, "away": 1}, "João": {"home": 1, "away": 0}, "Riquelme": {"home": 1, "away": 2}, "Milena": {"home": 1, "away": 0}}, "4": {"Thiago": {"home": 0, "away": 1}, "João": {"home": 0, "away": 1}, "Riquelme": {"home": 0, "away": 2}, "Milena": {"home": 0, "away": 2}, "Victor": {"home": 0, "away": 2}}, "5": {"Victor": {"home": 2, "away": 1}, "Milena": {"home": 2, "away": 1}, "Riquelme": {"home": 2, "away": 0}, "Thiago": {"home": 2, "away": 1}, "João": {"home": 2, "away": 1}}, "6": {"João": {"home": 0, "away": 2}, "Thiago": {"home": 0, "away": 3}, "Riquelme": {"home": 1, "away": 1}, "Milena": {"home": 1, "away": 2}, "Victor": {"home": 1, "away": 3}}, "7": {"Victor": {"home": 1, "away": 1}, "Milena": {"home": 2, "away": 1}, "Riquelme": {"home": 0, "away": 1}, "Thiago": {"home": 1, "away": 1}, "João": {"home": 1, "away": 1}}, "8": {"João": {"home": 1, "away": 2}, "Thiago": {"home": 1, "away": 3}, "Riquelme": {"home": 2, "away": 2}, "Milena": {"home": 1, "away": 2}, "Victor": {"home": 1, "away": 2}}, "9": {"Thiago": {"home": 2, "away": 0}, "Victor": {"home": 3, "away": 1}, "Milena": {"home": 3, "away": 1}, "Riquelme": {"home": 3, "away": 1}, "João": {"home": 3, "away": 0}}, "10": {"João": {"home": 0, "away": 2}, "Thiago": {"home": 1, "away": 2}, "Riquelme": {"home": 2, "away": 3}, "Milena": {"home": 1, "away": 1}, "Victor": {"home": 1, "away": 1}}, "11": {"Victor": {"home": 1, "away": 1}, "Milena": {"home": 2, "away": 2}, "Riquelme": {"home": 2, "away": 0}, "Thiago": {"home": 1, "away": 1}, "João": {"home": 2, "away": 2}}, "12": {"João": {"home": 1, "away": 1}, "Thiago": {"home": 0, "away": 3}, "Riquelme": {"home": 0, "away": 1}, "Milena": {"home": 0, "away": 2}, "Victor": {"home": 0, "away": 1}}, "13": {"Victor": {"home": 2, "away": 1}, "Milena": {"home": 3, "away": 0}, "Riquelme": {"home": 2, "away": 3}, "Thiago": {"home": 2, "away": 2}, "João": {"home": 2, "away": 1}}, "14": {"João": {"home": 1, "away": 0}, "Thiago": {"home": 0, "away": 0}, "Riquelme": {"home": 2, "away": 0}, "Milena": {"home": 2, "away": 2}, "Victor": {"home": 0, "away": 0}}, "15": {"Victor": {"home": 4, "away": 0}, "Milena": {"home": 1, "away": 0}, "João": {"home": 3, "away": 1}, "Thiago": {"home": 5, "away": 0}, "Riquelme": {"home": 3, "away": 0}}, "16": {"Victor": {"home": 1, "away": 2}, "João": {"home": 0, "away": 2}, "Thiago": {"home": 1, "away": 1}, "Riquelme": {"home": 2, "away": 1}, "Milena": {"home": 1, "away": 2}}, "17": {"Victor": {"home": 2, "away": 1}, "João": {"home": 2, "away": 1}, "Thiago": {"home": 3, "away": 2}, "Riquelme": {"home": 4, "away": 1}, "Milena": {"home": 2, "away": 0}}, "18": {"Victor": {"home": 1, "away": 3}, "João": {"home": 0, "away": 2}, "Thiago": {"home": 1, "away": 3}, "Riquelme": {"home": 3, "away": 3}, "Milena": {"home": 1, "away": 1}}, "19": {"Victor": {"home": 3, "away": 1}, "João": {"home": 2, "away": 0}, "Thiago": {"home": 3, "away": 0}, "Riquelme": {"home": 2, "away": 1}, "Milena": {"home": 2, "away": 1}}, "20": {"Victor": {"home": 0, "away": 3}, "João": {"home": 0, "away": 0}, "Thiago": {"home": 0, "away": 0}, "Riquelme": {"home": 1, "away": 0}, "Milena": {"home": 1, "away": 0}}, "21": {"Victor": {"home": 3, "away": 1}, "João": {"home": 3, "away": 1}, "Thiago": {"home": 4, "away": 0}, "Riquelme": {"home": 2, "away": 0}, "Milena": {"home": 2, "away": 0}}, "22": {"Victor": {"home": 0, "away": 3}, "João": {"home": 0, "away": 2}, "Thiago": {"home": 0, "away": 1}, "Riquelme": {"home": 1, "away": 2}, "Milena": {"home": 0, "away": 3}}, "23": {"Victor": {"home": 2, "away": 1}, "João": {"home": 2, "away": 3}, "Thiago": {"home": 2, "away": 2}, "Riquelme": {"home": 3, "away": 2}, "Milena": {"home": 3, "away": 3}}, "24": {"Victor": {"home": 1, "away": 1}, "João": {"home": 1, "away": 0}, "Thiago": {"home": 2, "away": 0}, "Riquelme": {"home": 1, "away": 1}, "Milena": {"home": 0, "away": 2}}, "25": {"Thiago": {"home": 0, "away": 1}, "Milena": {"home": 2, "away": 2}, "Victor": {"home": 1, "away": 0}, "Riquelme": {"home": 2, "away": 1}, "João": {"home": 2, "away": 0}}, "26": {"Victor": {"home": 2, "away": 2}, "Thiago": {"home": 1, "away": 1}, "João": {"home": 2, "away": 2}, "Milena": {"home": 1, "away": 2}, "Riquelme": {"home": 2, "away": 2}}, "27": {"Victor": {"home": 2, "away": 1}, "Thiago": {"home": 2, "away": 0}, "João": {"home": 1, "away": 0}, "Milena": {"home": 3, "away": 2}, "Riquelme": {"home": 2, "away": 1}}, "28": {"Victor": {"home": 2, "away": 1}, "Thiago": {"home": 2, "away": 1}, "João": {"home": 2, "away": 0}, "Milena": {"home": 1, "away": 0}, "Riquelme": {"home": 3, "away": 0}}, "29": {"Victor": {"home": 0, "away": 2}, "Thiago": {"home": 0, "away": 2}, "João": {"home": 0, "away": 2}, "Milena": {"home": 0, "away": 2}, "Riquelme": {"home": 1, "away": 3}}, "30": {"Victor": {"home": 3, "away": 0}, "Thiago": {"home": 4, "away": 0}, "João": {"home": 3, "away": 0}, "Milena": {"home": 2, "away": 1}, "Riquelme": {"home": 2, "away": 0}}, "31": {"Victor": {"home": 2, "away": 1}, "Thiago": {"home": 2, "away": 0}, "João": {"home": 0, "away": 2}, "Milena": {"home": 1, "away": 1}, "Riquelme": {"home": 2, "away": 1}}, "32": {"Victor": {"home": 2, "away": 1}, "Thiago": {"home": 3, "away": 1}, "João": {"home": 2, "away": 1}, "Milena": {"home": 2, "away": 2}, "Riquelme": {"home": 2, "away": 3}}, "33": {"Victor": {"home": 3, "away": 1}, "Thiago": {"home": 3, "away": 1}, "João": {"home": 4, "away": 2}, "Milena": {"home": 4, "away": 1}, "Riquelme": {"home": 1, "away": 2}}, "34": {"Victor": {"home": 2, "away": 0}, "Thiago": {"home": 3, "away": 0}, "João": {"home": 3, "away": 1}, "Milena": {"home": 1, "away": 1}, "Riquelme": {"home": 3, "away": 1}}, "35": {"Victor": {"home": 2, "away": 1}, "Thiago": {"home": 3, "away": 1}, "João": {"home": 2, "away": 1}, "Milena": {"home": 2, "away": 1}, "Riquelme": {"home": 3, "away": 2}}, "36": {"Victor": {"home": 1, "away": 3}, "Thiago": {"home": 0, "away": 2}, "João": {"home": 0, "away": 3}, "Milena": {"home": 1, "away": 2}, "Riquelme": {"home": 1, "away": 2}}, "37": {"Victor": {"home": 2, "away": 0}, "Thiago": {"home": 2, "away": 1}, "João": {"home": 2, "away": 1}, "Milena": {"home": 3, "away": 2}, "Riquelme": {"home": 3, "away": 1}}, "38": {"Victor": {"home": 1, "away": 2}, "Thiago": {"home": 1, "away": 1}, "João": {"home": 0, "away": 2}, "Milena": {"home": 2, "away": 3}, "Riquelme": {"home": 1, "away": 3}}, "39": {"Victor": {"home": 2, "away": 0}, "Thiago": {"home": 3, "away": 0}, "João": {"home": 2, "away": 1}, "Milena": {"home": 2, "away": 2}, "Riquelme": {"home": 2, "away": 2}}, "40": {"Victor": {"home": 2, "away": 1}, "Thiago": {"home": 3, "away": 1}, "João": {"home": 2, "away": 1}, "Milena": {"home": 2, "away": 2}, "Riquelme": {"home": 2, "away": 0}}, "41": {"Victor": {"home": 3, "away": 0}, "Thiago": {"home": 4, "away": 0}, "João": {"home": 4, "away": 1}, "Milena": {"home": 3, "away": 1}, "Riquelme": {"home": 5, "away": 1}}, "42": {"Victor": {"home": 3, "away": 1}, "Thiago": {"home": 1, "away": 2}, "João": {"home": 3, "away": 2}, "Milena": {"home": 3, "away": 1}, "Riquelme": {"home": 1, "away": 2}}, "43": {"Victor": {"home": 3, "away": 1}, "Thiago": {"home": 3, "away": 1}, "João": {"home": 2, "away": 0}, "Milena": {"home": 4, "away": 1}, "Riquelme": {"home": 4, "away": 2}}, "44": {"Victor": {"home": 1, "away": 2}, "Thiago": {"home": 0, "away": 1}, "João": {"home": 0, "away": 0}, "Milena": {"home": 1, "away": 1}, "Riquelme": {"home": 1, "away": 2}}, "45": {"Victor": {"home": 2, "away": 0}, "Thiago": {"home": 3, "away": 0}, "João": {"home": 2, "away": 0}, "Milena": {"home": 2, "away": 0}, "Riquelme": {"home": 2, "away": 1}}, "46": {"Victor": {"home": 2, "away": 1}, "Thiago": {"home": 2, "away": 0}, "João": {"home": 3, "away": 1}, "Milena": {"home": 3, "away": 1}, "Riquelme": {"home": 2, "away": 1}}, "47": {"Victor": {"home": 3, "away": 1}, "Thiago": {"home": 3, "away": 1}, "João": {"home": 2, "away": 0}, "Milena": {"home": 3, "away": 1}, "Riquelme": {"home": 3, "away": 0}}, "48": {"Victor": {"home": 0, "away": 2}, "Thiago": {"home": 0, "away": 2}, "João": {"home": 0, "away": 2}, "Milena": {"home": 0, "away": 2}, "Riquelme": {"home": 2, "away": 2}}, "49": {"Thiago": {"home": 1, "away": 3}, "João": {"home": 0, "away": 2}, "Victor": {"home": 1, "away": 2}, "Milena": {"home": 1, "away": 2}, "Riquelme": {"home": 1, "away": 3}}, "50": {"Thiago": {"home": 1, "away": 2}, "João": {"home": 1, "away": 2}, "Victor": {"home": 1, "away": 2}, "Milena": {"home": 0, "away": 2}, "Riquelme": {"home": 1, "away": 2}}, "51": {"Thiago": {"home": 2, "away": 0}, "João": {"home": 1, "away": 2}, "Victor": {"home": 1, "away": 1}, "Milena": {"home": 1, "away": 3}, "Riquelme": {"home": 2, "away": 2}}, "52": {"Thiago": {"home": 1, "away": 0}, "João": {"home": 1, "away": 0}, "Victor": {"home": 2, "away": 0}, "Milena": {"home": 2, "away": 0}, "Riquelme": {"home": 2, "away": 0}}, "53": {"Thiago": {"home": 0, "away": 2}, "João": {"home": 1, "away": 3}, "Victor": {"home": 1, "away": 3}, "Milena": {"home": 1, "away": 3}, "Riquelme": {"home": 1, "away": 4}}, "54": {"Thiago": {"home": 4, "away": 1}, "João": {"home": 4, "away": 0}, "Victor": {"home": 3, "away": 0}, "Milena": {"home": 1, "away": 0}, "Riquelme": {"home": 3, "away": 0}}, "55": {"Thiago": {"home": 0, "away": 2}, "João": {"home": 0, "away": 3}, "Victor": {"home": 1, "away": 2}, "Milena": {"home": 0, "away": 3}, "Riquelme": {"home": 1, "away": 3}}, "56": {"Thiago": {"home": 1, "away": 0}, "João": {"home": 1, "away": 1}, "Victor": {"home": 1, "away": 1}, "Milena": {"home": 1, "away": 2}, "Riquelme": {"home": 2, "away": 0}}, "57": {"Thiago": {"home": 1, "away": 3}, "João": {"home": 0, "away": 2}, "Victor": {"home": 0, "away": 3}, "Milena": {"home": 0, "away": 4}, "Riquelme": {"home": 2, "away": 3}}, "58": {"Thiago": {"home": 0, "away": 3}, "João": {"home": 0, "away": 3}, "Victor": {"home": 1, "away": 2}, "Milena": {"home": 1, "away": 2}, "Riquelme": {"home": 1, "away": 5}}, "60": {"Thiago": {"home": 0, "away": 4}, "João": {"home": 0, "away": 3}, "Victor": {"home": 0, "away": 3}, "Milena": {"home": 0, "away": 3}, "Riquelme": {"home": 1, "away": 4}}, "59": {"Thiago": {"home": 2, "away": 1}, "João": {"home": 2, "away": 1}, "Victor": {"home": 2, "away": 1}, "Milena": {"home": 2, "away": 1}, "Riquelme": {"home": 5, "away": 2}}, "62": {"Thiago": {"home": 0, "away": 2}, "João": {"home": 0, "away": 2}, "Victor": {"home": 0, "away": 1}, "Milena": {"home": 0, "away": 1}, "Riquelme": {"home": 0, "away": 1}}, "61": {"Thiago": {"home": 2, "away": 1}, "João": {"home": 2, "away": 0}, "Victor": {"home": 2, "away": 1}, "Milena": {"home": 2, "away": 2}, "Riquelme": {"home": 2, "away": 1}}, "64": {"Thiago": {"home": 0, "away": 3}, "João": {"home": 0, "away": 2}, "Victor": {"home": 2, "away": 3}, "Milena": {"home": 2, "away": 3}, "Riquelme": {"home": 2, "away": 4}}, "63": {"Thiago": {"home": 2, "away": 1}, "João": {"home": 1, "away": 1}, "Victor": {"home": 1, "away": 1}, "Milena": {"home": 1, "away": 2}, "Riquelme": {"home": 1, "away": 0}}, "65": {"Thiago": {"home": 2, "away": 3}, "João": {"home": 2, "away": 4}, "Victor": {"home": 2, "away": 3}, "Milena": {"home": 2, "away": 3}, "Riquelme": {"home": 1, "away": 6}}, "66": {"Thiago": {"home": 1, "away": 0}, "João": {"home": 2, "away": 0}, "Victor": {"home": 2, "away": 1}, "Milena": {"home": 1, "away": 1}, "Riquelme": {"home": 3, "away": 2}}, "68": {"Thiago": {"home": 0, "away": 3}, "João": {"home": 0, "away": 4}, "Victor": {"home": 0, "away": 3}, "Milena": {"home": 0, "away": 3}, "Riquelme": {"home": 1, "away": 4}}, "67": {"Thiago": {"home": 0, "away": 0}, "João": {"home": 1, "away": 1}, "Victor": {"home": 1, "away": 1}, "Milena": {"home": 0, "away": 2}, "Riquelme": {"home": 1, "away": 1}}, "69": {"Thiago": {"home": 1, "away": 3}, "João": {"home": 2, "away": 1}, "Victor": {"home": 1, "away": 2}, "Milena": {"home": 2, "away": 0}, "Riquelme": {"home": 3, "away": 2}}, "70": {"Thiago": {"home": 2, "away": 0}, "João": {"home": 1, "away": 0}, "Victor": {"home": 2, "away": 1}, "Milena": {"home": 3, "away": 0}, "Riquelme": {"home": 1, "away": 0}}, "71": {"Thiago": {"home": 0, "away": 4}, "João": {"home": 0, "away": 3}, "Victor": {"home": 0, "away": 2}, "Milena": {"home": 0, "away": 1}, "Riquelme": {"home": 2, "away": 4}}, "72": {"Thiago": {"home": 2, "away": 0}, "João": {"home": 2, "away": 0}, "Victor": {"home": 1, "away": 0}, "Milena": {"home": 1, "away": 0}, "Riquelme": {"home": 3, "away": 1}}}, "resultados": {"1": {"home": 2, "away": 0, "confirmed": true}, "2": {"home": 2, "away": 1, "confirmed": true}, "3": {"home": 1, "away": 1, "confirmed": true}, "4": {"home": 1, "away": 1, "confirmed": true}, "5": {"home": 1, "away": 1, "confirmed": true}, "6": {"home": 0, "away": 1, "confirmed": true}, "7": {"home": 4, "away": 1, "confirmed": true}, "8": {"home": 2, "away": 0, "confirmed": true}, "9": {"home": 7, "away": 1, "confirmed": true}, "10": {"home": 1, "away": 0, "confirmed": true}, "11": {"home": 2, "away": 2, "confirmed": true}, "12": {"home": 1, "away": 5, "confirmed": true}, "13": {"home": 1, "away": 1, "confirmed": true}, "14": {"home": 2, "away": 2, "confirmed": true}, "15": {"home": 0, "away": 0, "confirmed": true}, "16": {"home": 1, "away": 1, "confirmed": true}, "17": {"home": 3, "away": 1, "confirmed": true}, "18": {"home": 1, "away": 4, "confirmed": true}, "19": {"home": 3, "away": 0, "confirmed": true}, "20": {"home": 1, "away": 3, "confirmed": true}, "21": {"home": 1, "away": 1, "confirmed": true}, "22": {"home": 1, "away": 3, "confirmed": true}, "23": {"home": 4, "away": 2, "confirmed": true}, "24": {"home": 1, "away": 0, "confirmed": true}, "25": {"home": 1, "away": 1, "confirmed": true}, "26": {"home": 1, "away": 0, "confirmed": true}, "27": {"home": 4, "away": 1, "confirmed": true}, "28": {"home": 6, "away": 0, "confirmed": true}, "29": {"home": 0, "away": 1, "confirmed": true}, "30": {"home": 3, "away": 0, "confirmed": true}, "31": {"home": 0, "away": 1, "confirmed": true}, "32": {"home": 2, "away": 0, "confirmed": true}, "33": {"home": 2, "away": 1, "confirmed": true}, "34": {"home": 0, "away": 0, "confirmed": true}, "35": {"home": 5, "away": 1, "confirmed": true}, "36": {"home": 0, "away": 4, "confirmed": true}, "37": {"home": 0, "away": 0, "confirmed": true}, "38": {"home": 1, "away": 3, "confirmed": true}, "39": {"home": 4, "away": 0, "confirmed": true}, "40": {"home": 2, "away": 2, "confirmed": true}, "41": {"home": 3, "away": 0, "confirmed": true}, "42": {"home": 3, "away": 2, "confirmed": true}, "43": {"home": 2, "away": 0, "confirmed": true}, "44": {"home": 1, "away": 2, "confirmed": true}, "45": {"home": 5, "away": 0, "confirmed": true}, "46": {"home": 1, "away": 0, "confirmed": true}, "47": {"home": 0, "away": 0, "confirmed": true}, "48": {"home": 0, "away": 1, "confirmed": true}}};
+    var existing = localStorage.getItem("bolao_copa_2026");
+    if (!existing) {
+      state = preloaded;
+      saveState();
+    } else {
+      var cur = JSON.parse(existing);
+      for (var jid in preloaded.palpites) {
+        if (!cur.palpites[jid]) cur.palpites[jid] = {};
+        for (var part in preloaded.palpites[jid]) {
+          if (!cur.palpites[jid][part]) cur.palpites[jid][part] = preloaded.palpites[jid][part];
+        }
+      }
+      for (var jid2 in preloaded.resultados) {
+        if (!cur.resultados[jid2]) cur.resultados[jid2] = preloaded.resultados[jid2];
+      }
+      state = cur;
+      saveState();
+    }
+  } catch(e) { console.error('Erro ao carregar estado:', e); }
+})();
+renderAll();
+</script>
+</body>
+</html>
